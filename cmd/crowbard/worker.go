@@ -44,8 +44,8 @@ func socketWorker(wWorker worker) {
 			n, err := wWorker.remote.Read(data)
 			if err != nil {
 				workerQuit(wWorker.responseChannel, "Read error.")
-				wWorker.commandChannel <- workerCommand{command: "bogus"}
 				continue_loop = false
+				wWorker.commandChannel <- workerCommand{command: "bogus"}
 			} else {
 				wWorker.responseChannel <- workerResponse{response: response_data, extra_byte: data[:n]}
 			}
