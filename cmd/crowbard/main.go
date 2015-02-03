@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"flag"
 	"fmt"
@@ -14,6 +15,28 @@ import (
 	"github.com/q3k/crowbar"
 )
 
+var nonceMap = map[string][]byte{}
+
+func authHandler(w http.ResponseWriter, r *http.Request) {
+	nonce := make([]byte, 16)
+	_, err := rand.Read(nonce)
+	if err != nil {
+		crowbar.WriteHTTPError(w, "Internal error.")
+		return
+	}
+
+	username := r.URL.Query().Get("username")
+	_, ok := UserGet(username)
+
+	if !ok {
+		crowbar.WriteHTTPError(w, "No such user.")
+		return
+	}
+
+	nonceMap[username] = nonce
+	crowbar.WriteHTTPData(w, nonce)
+}
+
 func connectHandler(w http.ResponseWriter, r *http.Request) {
 	remote_host := r.URL.Query().Get("remote_host")
 	if remote_host == "" {
@@ -24,6 +47,35 @@ func connectHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil || remote_port > 0xFFFF {
 		crowbar.WriteHTTPError(w, "Invalid port number.")
 		return
+	}
+	username := r.URL.Query().Get("username")
+	if username == "" {
+		crowbar.WriteHTTPError(w, "Invalid username")
+		return
+	}
+	user, ok := UserGet(username)
+	if !ok {
+		crowbar.WriteHTTPError(w, "Invalid username")
+		return
+	}
+	nonce, ok := nonceMap[username]
+	if !ok {
+		crowbar.WriteHTTPError(w, "Invalid username")
+		return
+	}
+
+	proof_b64 := r.URL.Query().Get("proof")
+	decodeLen := base64.StdEncoding.DecodedLen(len(proof_b64))
+	proof := make([]byte, decodeLen)
+	_, err = base64.StdEncoding.Decode(proof, []byte(proof_b64))
+	if err != nil {
+		crowbar.WriteHTTPError(w, "Invalid nonce")
+		return
+	}
+
+	authenticated := user.Authenticate(nonce, proof)
+	if !authenticated {
+		crowbar.WriteHTTPError(w, "Invalid nonce")
 	}
 
 	workerUuid := uuid.New()
@@ -79,9 +131,12 @@ func syncHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	var listen = flag.String("listen", "0.0.0.0:8080", "Address to bind HTTP server to")
+	var userfile = flag.String("userfile", "/etc/crowbard.conf", "Path of user config file")
 	flag.Parse()
+	loadUsersFromFile(*userfile)
 	fmt.Fprintf(os.Stderr, "Server starting on %s...\n", *listen)
 	http.HandleFunc(crowbar.EndpointConnect, connectHandler)
 	http.HandleFunc(crowbar.EndpointSync, syncHandler)
+	http.HandleFunc(crowbar.EndpointAuth, authHandler)
 	http.ListenAndServe(*listen, nil)
 }

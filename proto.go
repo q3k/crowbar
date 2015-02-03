@@ -29,5 +29,6 @@ func WriteHTTPQuit(w http.ResponseWriter, data string) {
     fmt.Fprintf(w, "%s:%s", PrefixQuit, data)
 }
 
-const EndpointConnect string = "/connect"
-const EndpointSync string = "/sync"
+const EndpointConnect string = "/connect/"
+const EndpointSync string = "/sync/"
+const EndpointAuth string = "/auth/"
