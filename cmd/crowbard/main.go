@@ -67,15 +67,17 @@ func connectHandler(w http.ResponseWriter, r *http.Request) {
 	proof_b64 := r.URL.Query().Get("proof")
 	decodeLen := base64.StdEncoding.DecodedLen(len(proof_b64))
 	proof := make([]byte, decodeLen)
-	_, err = base64.StdEncoding.Decode(proof, []byte(proof_b64))
+	n, err := base64.StdEncoding.Decode(proof, []byte(proof_b64))
 	if err != nil {
 		crowbar.WriteHTTPError(w, "Invalid nonce")
 		return
 	}
+	proof = proof[:n]
 
 	authenticated := user.Authenticate(nonce, proof)
 	if !authenticated {
 		crowbar.WriteHTTPError(w, "Invalid nonce")
+		return
 	}
 
 	workerUuid := uuid.New()

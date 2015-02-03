@@ -17,16 +17,16 @@ func WriteHTTPError(w http.ResponseWriter, message string) {
 }
 
 func WriteHTTPOK(w http.ResponseWriter, data string) {
-    fmt.Fprintf(w, "%s:%s", PrefixOK, data)
+    fmt.Fprintf(w, "%s%s", PrefixOK, data)
 }
 
 func WriteHTTPData(w http.ResponseWriter, data []byte) {
     data_encoded := base64.StdEncoding.EncodeToString(data)
-    fmt.Fprintf(w, "%s:%s", PrefixData, data_encoded)
+    fmt.Fprintf(w, "%s%s", PrefixData, data_encoded)
 }
 
 func WriteHTTPQuit(w http.ResponseWriter, data string) {
-    fmt.Fprintf(w, "%s:%s", PrefixQuit, data)
+    fmt.Fprintf(w, "%s%s", PrefixQuit, data)
 }
 
 const EndpointConnect string = "/connect/"
