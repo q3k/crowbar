@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"net"
+	"os"
 	"net/http"
 	"strconv"
 
@@ -77,7 +78,10 @@ func syncHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	var listen = flag.String("listen", "0.0.0.0:8080", "Address to bind HTTP server to")
+	flag.Parse()
+	fmt.Fprintf(os.Stderr, "Server starting on %s...\n", *listen)
 	http.HandleFunc(crowbar.EndpointConnect, connectHandler)
 	http.HandleFunc(crowbar.EndpointSync, syncHandler)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(*listen, nil)
 }
