@@ -8,6 +8,8 @@ import (
     "encoding/base64"
 
     "code.google.com/p/go-uuid/uuid"
+
+    "github.com/q3k/crowbar"
 )
 
 const command_data string = "DATA"
@@ -74,9 +76,13 @@ var workerMap = map[string]worker{}
 
 func connectHandler(w http.ResponseWriter, r *http.Request) {
     remote_host := r.URL.Query().Get("remote_host")
+    if remote_host == "" {
+        crowbar.WriteHTTPError(w, "Invalid host")
+        return
+    }
     remote_port, err := strconv.Atoi(r.URL.Query().Get("remote_port"))
     if err != nil || remote_port > 0xFFFF {
-        http.Error(w, "ERROR: That's not a valid port number.", http.StatusInternalServerError)
+        crowbar.WriteHTTPError(w, "Invalid port number.")
         return
     }
 
@@ -86,14 +92,14 @@ func connectHandler(w http.ResponseWriter, r *http.Request) {
     fmt.Printf("Connecting to %s:%d...\n", remote_host, remote_port)
     remote, err := net.Dial("tcp", fmt.Sprintf("%s:%d", remote_host, remote_port))
     if err != nil {
-        http.Error(w, "ERROR: Could not connect.", http.StatusInternalServerError)
+        crowbar.WriteHTTPError(w, fmt.Sprintf("Could not connect to %s:%d", remote_host, remote_port))
         return
     }
 
     newWorker := worker{remote: remote, commandChannel: commandChannel, responseChannel: responseChannel, uuid: workerUuid}
     workerMap[workerUuid] = newWorker
 
-    fmt.Fprintf(w, "OK: %s", workerUuid)
+    crowbar.WriteHTTPOK(w, workerUuid)
 
     go socketWorker(newWorker)
 }
@@ -109,31 +115,30 @@ func syncHandler(w http.ResponseWriter, r *http.Request) {
                 data := make([]byte, decodeLen)
                 n, err := base64.StdEncoding.Decode(data, []byte(b64))
                 if err != nil {
-                    http.Error(w, "ERROR: What the hell did you send me?", http.StatusInternalServerError)
+                    crowbar.WriteHTTPError(w, "Could not decode B64.")
                 } else {
                     worker.commandChannel <- workerCommand{command: command_data, extra: data[:n]}
-                    fmt.Fprintf(w, "OK: Sent.")
+                    crowbar.WriteHTTPOK(w, "Sent.")
                 }
             } else {
-                http.Error(w, "ERROR: You forgot to send me data.", http.StatusInternalServerError)
+                crowbar.WriteHTTPError(w, "Data is required.")
             }
         } else {
             response := <-worker.responseChannel;
             switch response.response {
                 case response_data:
-                    data := base64.StdEncoding.EncodeToString(response.extra_byte)
-                    fmt.Fprintf(w, "DATA: %s", data)
+                    crowbar.WriteHTTPData(w, response.extra_byte)
                 case response_quit:
-                    fmt.Fprintf(w, "QUIT: %s", response.extra_string)
+                    crowbar.WriteHTTPQuit(w, response.extra_string)
             }
         }
     } else {
-        http.Error(w, "ERROR: No such uuid.", http.StatusInternalServerError)
+        crowbar.WriteHTTPError(w, "No such UUID")
     }
 }
 
 func main() {
-    http.HandleFunc("/connect/", connectHandler)
-    http.HandleFunc("/sync/", syncHandler)
+    http.HandleFunc(crowbar.EndpointConnect, connectHandler)
+    http.HandleFunc(crowbar.EndpointSync, syncHandler)
     http.ListenAndServe(":8080", nil)
 }
