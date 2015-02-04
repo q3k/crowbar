@@ -8,9 +8,9 @@ Intro
 
 ![Crowbar overview](http://q3k.org/crowbar-overview.png)
 
-Crowbar is a tool that allows you to establish secure VPN with your existing TCP endpoints (an OpenVPN setup, an SSH for forwarding...) when your network connection is limited by a Web proxy that only allows basic port 80 HTTP connectivity.
+Crowbar is a tool that allows you to establish a secure circuit with your existing encrypting TCP endpoints (an OpenVPN setup, an SSH server for forwarding...) when your network connection is limited by a Web proxy that only allows basic port 80 HTTP connectivity.
 
-Crowbar will tunnel TCP connections over ever a HTTP session using only GET and POST requests. This is in contrast to most tunneling systems that reuse the CONNECT verb. It also provides basic authentication to make sure nobody who stumbles upon the server steals your proxy to order drugs from Silkroad.
+Crowbar will tunnel TCP connections over an HTTP session using only GET and POST requests. This is in contrast to most tunneling systems that reuse the CONNECT verb. It also provides basic authentication to make sure nobody who stumbles upon the server steals your proxy to order drugs from Silkroad.
 
 Features
 --------
@@ -22,7 +22,7 @@ Features
 Security & Confidentiality
 --------------------------
 
-Crowbar **DOES NOT PROVIDE ANY DATA CONFIDENTIALITY**. While the user authentication mechanism protects from replay attacks to establish connectivity, it will not prevent someone from MITMing the later connection transfer itself, or fror MITMing whole sessions. So, yeah, make sure to tunnel an SSH or OpenVPN over the tunnel, and firewall off most outgoing connections on your proxy server (ie. only allow access to an already publically-available SSH server)
+Crowbar **DOES NOT PROVIDE ANY DATA CONFIDENTIALITY**. While the user authentication mechanism protects from replay attacks to establish connectivity, it will not prevent someone from MITMing the later connection transfer itself, or fror MITMing whole sessions. So, yeah, make sure to **use it only tunnel an SSH or OpenVPN server**, and **firewall off most outgoing connections on your proxy server** (ie. only allow access to an already publically-available SSH server)
 
 The authentication code and crypto have not been reviewed by cryptographers. I am not a cryptographer. You should consider this when deploying Crowbar.
 
@@ -31,12 +31,19 @@ Known bugs
 
 The crypto can be improved vastly to enable server authentication and make MITMing more difficult. It could also use a better authentication setup to allow the server to keep password hashes instead of plaintext.
 
+The server should include some filtering functionality for allowed remote connections.
+
 The server lacks any cleanup functions and rate limiting, so it will leak both descriptors and memory - this should be fixed soon.
 
 Is it any good?
 ---------------
 
 Eh, it works. I'm not an experienced Golang programmer though, so the codebase is probably butt-ugly.
+
+License
+-------
+
+BSD 2-clause, 'nuff said.
 
 Usage
 =====
