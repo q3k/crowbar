@@ -48,7 +48,7 @@ func main() {
 		return
 	}
 	if *password == "" {
-		fmt.Fprintf(os.Stderr, "Username must be given.\n")
+		fmt.Fprintf(os.Stderr, "Password must be given.\n")
 		return
 	}
 
