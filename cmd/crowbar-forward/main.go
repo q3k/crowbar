@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
+	"net"
 
 	"github.com/q3k/crowbar"
 )
@@ -15,18 +17,20 @@ func main() {
 
 	fmt.Println(*local, *remote, *server)
 
-	conn, err := crowbar.Connect(*server, "q3k", "dupa.8", *remote)
+	localListen, err := net.Listen("tcp", *local)
 	if err != nil {
 		panic(err)
 	}
-	n, err := conn.Write([]byte("test"))
-	if err != nil {
-		panic(err)
+	for {
+		localConn, err := localListen.Accept()
+		if err != nil {
+			panic(err)
+		}
+		remoteConn, err := crowbar.Connect(*server, "q3k", "dupa.8", *remote)
+		if err != nil {
+			panic(err)
+		}
+		go io.Copy(localConn, remoteConn)
+		io.Copy(remoteConn, localConn)
 	}
-	b := make([]byte, 1024)
-	n, err = conn.Read(b)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("%v %v %v\n", n, err, b)
 }

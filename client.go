@@ -96,7 +96,7 @@ func (c *ProxyConnection) Read(b []byte) (n int, err error) {
 	return count, nil
 }
 
-func Connect(server, username, password, remote string) (ProxyConnection, error) {
+func Connect(server, username, password, remote string) (*ProxyConnection, error) {
 	if strings.HasSuffix(server, "/") {
 		server = server[:len(server)-1]
 	}
@@ -105,24 +105,24 @@ func Connect(server, username, password, remote string) (ProxyConnection, error)
 	args := fmt.Sprintf("?username=%s", username)
 	resp, err := http.Get(conn.server + EndpointAuth + args)
 	if err != nil {
-		return ProxyConnection{}, err
+		return &ProxyConnection{}, err
 	}
 	data_bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return ProxyConnection{}, err
+		return &ProxyConnection{}, err
 	}
 	defer resp.Body.Close()
 	data := string(data_bytes)
 	if !strings.HasPrefix(data, PrefixData) {
 		msg := fmt.Sprintf("crowbar: Invalid data returned by server: %s", data)
-		return ProxyConnection{}, errors.New(msg)
+		return &ProxyConnection{}, errors.New(msg)
 	}
 	nonce_b64 := data[len(PrefixData):]
 	decodeLen := base64.StdEncoding.DecodedLen(len(nonce_b64))
 	nonce := make([]byte, decodeLen)
 	n, err := base64.StdEncoding.Decode(nonce, []byte(nonce_b64))
 	if err != nil {
-		return ProxyConnection{}, errors.New("crowbar: Invalid nonce")
+		return &ProxyConnection{}, errors.New("crowbar: Invalid nonce")
 	}
 	nonce = nonce[:n]
 
@@ -137,18 +137,18 @@ func Connect(server, username, password, remote string) (ProxyConnection, error)
 	v.Set("proof", base64.StdEncoding.EncodeToString(hmac))
 	resp, err = http.Get(conn.server + EndpointConnect + "?" + v.Encode())
 	if err != nil {
-		return ProxyConnection{}, err
+		return &ProxyConnection{}, err
 	}
 	data_bytes, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return ProxyConnection{}, err
+		return &ProxyConnection{}, err
 	}
 	defer resp.Body.Close()
 	data = string(data_bytes)
 	if !strings.HasPrefix(data, PrefixOK) {
-		return ProxyConnection{}, errors.New("crowbar: Authentication error")
+		return &ProxyConnection{}, errors.New("crowbar: Authentication error")
 	}
 	conn.uuid = data[len(PrefixOK):]
 
-	return conn, nil
+	return &conn, nil
 }
