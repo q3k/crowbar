@@ -1,0 +1,22 @@
+{
+	"ImportPath": "github.com/q3k/crowbar",
+	"GoVersion": "go1.3.3",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "code.google.com/p/go-uuid/uuid",
+			"Comment": "null-15",
+			"Rev": "35bc42037350f0078e3c974c6ea690f1926603ab"
+		},
+		{
+			"ImportPath": "github.com/howeyc/gopass",
+			"Rev": "1af4cd08f75465cbb0fcec37b64b77c4a6b6d41a"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh/terminal",
+			"Rev": "7db43667c77d5d330c359ffd03f5789cf390e973"
+		}
+	]
+}
