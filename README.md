@@ -85,12 +85,12 @@ Crowbar will honor the _de-facto_ standard HTTP\_PROXY env var on Linux:
 
 For netcat-like functionality:
 
-    crowbar-forward -local=- -username q3k -server http://your.proxy.server.com:80 -remote towel.blinkenlights.nl:23
+    crowbar-forward -local=- -username q3k -password secret -server http://your.proxy.server.com:80 -remote towel.blinkenlights.nl:23
 
 For port-forwarding:
 
 
-    crowbar-forward -local=127.0.0.1:1337 -username q3k -server http://your.proxy.server.com:80 -remote towel.blinkenlights.nl:23 &
+    crowbar-forward -local=127.0.0.1:1337 -username q3k -password secret -server http://your.proxy.server.com:80 -remote towel.blinkenlights.nl:23 &
     nc 127.0.0.1 1337
 
 

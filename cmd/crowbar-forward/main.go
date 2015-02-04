@@ -33,7 +33,6 @@ import (
 	"os"
 
 	"github.com/q3k/crowbar"
-	"github.com/howeyc/gopass"
 )
 
 func main() {
@@ -41,7 +40,7 @@ func main() {
 	remote := flag.String("remote", "HOST:PORT", "Remote address to establish tunnel to.")
 	server := flag.String("server", "http://127.0.0.1:8080/", "Crowbar server to use.")
 	username := flag.String("username", "", "Username to use.")
-	password := flag.String("password", "", "Password to use, or empty for interactive getpass.")
+	password := flag.String("password", "", "Password to use.")
 	flag.Parse()
 
 	if *username == "" {
@@ -49,30 +48,34 @@ func main() {
 		return
 	}
 	if *password == "" {
-		fmt.Fprintf(os.Stderr, "Password: ")
-		*password = string(gopass.GetPasswd())
+		fmt.Fprintf(os.Stderr, "Username must be given.\n")
+		return
 	}
 
 	if *local == "-" {
 		remoteConn, err := crowbar.Connect(*server, *username, *password, *remote)
 		if err != nil {
-			panic(err)
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			return
 		}
 		go io.Copy(remoteConn, os.Stdin)
 		io.Copy(os.Stdout, remoteConn)
 	} else {
 		localListen, err := net.Listen("tcp", *local)
 		if err != nil {
-			panic(err)
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			return
 		}
 		for {
 			localConn, err := localListen.Accept()
 			if err != nil {
-				panic(err)
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				return
 			}
 			remoteConn, err := crowbar.Connect(*server, *username, *password, *remote)
 			if err != nil {
-				panic(err)
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				return
 			}
 			go io.Copy(localConn, remoteConn)
 			io.Copy(remoteConn, localConn)
