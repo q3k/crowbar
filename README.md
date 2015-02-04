@@ -48,6 +48,11 @@ BSD 2-clause, 'nuff said.
 Usage
 =====
 
+Binary releases
+---------------
+
+Release and snapshot binaries can be downloaded from [this project's Github Releases page](https://github.com/q3k/crowbar/releases).
+
 Server setup
 ------------
 
