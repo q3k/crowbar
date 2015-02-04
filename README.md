@@ -1,8 +1,3 @@
-LIES LIES LIES
-==============
-
-THIS IS A *WIP* PIECE OF SOFTWARE, EVERYTHING UNDERNEATH IS A LIE, PLEASE MOVE ON.
-
 Crowbar
 =======
 
@@ -10,6 +5,8 @@ When a [corkscrew](http://www.agroman.net/corkscrew/) just isn't enough...
 
 Intro
 -----
+
+![Crowbar overview](http://q3k.org/crowbar-overview.png)
 
 Crowbar will tunnel TCP connections over ever a HTTP session using only GET and POST requests. This is in contrast to most tunneling systems that reuse the CONNECT verb. It provides basic authentication to make sure nobody steals your proxy to order drugs from Silkroad.
 
