@@ -15,6 +15,14 @@ func main() {
 
 	fmt.Println(*local, *remote, *server)
 
-	_, err := crowbar.Connect(*server, "q3k", "dupa.8", *remote)
-	fmt.Println(err)
+	conn, err := crowbar.Connect(*server, "q3k", "dupa.8", *remote)
+	if err != nil {
+		panic(err)
+	}
+	b := make([]byte, 1024)
+	n, err := conn.Read(b)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%v %v %v\n", n, err, b)
 }

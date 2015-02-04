@@ -7,16 +7,70 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-    "encoding/base64"
+	"sync"
+	"encoding/base64"
 	"crypto/hmac"
 	"crypto/sha256"
 )
 
 type ProxyConnection struct {
-	uuid	string
-	server	string
+	uuid		string
+	server		string
+	read_buffer	[]byte
+	read_mutex	sync.Mutex
 }
 
+func (c *ProxyConnection) FillReadBuffer() error {
+	args := fmt.Sprintf("?uuid=" + c.uuid)
+	resp, err := http.Get(c.server + EndpointSync + args)
+	if err != nil {
+		return err
+	}
+	data_bytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	data := string(data_bytes)
+
+	if strings.HasPrefix(data, PrefixData) {
+		data := data[len(PrefixData):]
+
+		decodeLen := base64.StdEncoding.DecodedLen(len(data))
+		bData := make([]byte, len(c.read_buffer) + decodeLen)
+		n, err := base64.StdEncoding.Decode(bData[len(c.read_buffer):], []byte(data))
+		if err != nil {
+			return err
+		}
+		bData = bData[:len(c.read_buffer)+n]
+		c.read_buffer = bData
+	} else {
+		return errors.New("Could not read from server")
+	}
+	return nil
+}
+
+func (c *ProxyConnection) Read(b []byte) (n int, err error) {
+	c.read_mutex.Lock()
+	// If local buffer is empty, get new data
+	if len(c.read_buffer) == 0 {
+		err := c.FillReadBuffer()
+		if err != nil {
+			c.read_mutex.Unlock()
+			return 0, err
+		}
+	}
+	// Return local buffer
+	count := len(b)
+	if count > len(c.read_buffer){
+		count = len(c.read_buffer)
+	}
+	copy(b, c.read_buffer[:count])
+	c.read_buffer = c.read_buffer[count:]
+
+	c.read_mutex.Unlock()
+	return count, nil
+}
 
 func Connect(server, username, password, remote string) (ProxyConnection, error) {
 	if strings.HasSuffix(server, "/") {
@@ -67,7 +121,6 @@ func Connect(server, username, password, remote string) (ProxyConnection, error)
 	}
 	defer resp.Body.Close()
 	data = string(data_bytes)
-	fmt.Println(data)
 	if !strings.HasPrefix(data, PrefixOK) {
 		return ProxyConnection{}, errors.New("crowbar: Authentication error")
 	}
