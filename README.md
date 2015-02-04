@@ -22,7 +22,7 @@ Features
 Security & Confidentiality
 --------------------------
 
-Crowbar **DOES NOT PROVIDE ANY DATA CONFIDENTIALITY**. While the user authentication mechanism protects from replay attacks to establish connectivity, it will not prevent someone from MITMing the later connection transfer itself, or fror MITMing whole sessions. So, yeah, make sure to **use it only tunnel an SSH or OpenVPN server**, and **firewall off most outgoing connections on your proxy server** (ie. only allow access to an already publically-available SSH server)
+Crowbar **DOES NOT PROVIDE ANY DATA CONFIDENTIALITY**. While the user authentication mechanism protects from replay attacks to establish connectivity, it will not prevent someone from MITMing the later connection transfer itself, or from MITMing whole sessions. So, yeah, make sure to **use it only tunnel an SSH or OpenVPN server**, and **firewall off most outgoing connections on your proxy server** (ie. only allow access to an already publicly-available SSH server)
 
 The authentication code and crypto have not been reviewed by cryptographers. I am not a cryptographer. You should consider this when deploying Crowbar.
 
