@@ -20,6 +20,30 @@ type ProxyConnection struct {
 	read_mutex	sync.Mutex
 }
 
+func (c *ProxyConnection) Write(b []byte) (int, error) {
+	url_args := fmt.Sprintf("?uuid=" + c.uuid)
+	post_args := url.Values{}
+	post_args.Set("data", base64.StdEncoding.EncodeToString(b))
+
+	resp, err := http.PostForm(c.server + EndpointSync + url_args, post_args)
+	if err != nil {
+		return 0, err
+	}
+	data_bytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
+	data := string(data_bytes)
+
+	if !strings.HasPrefix(data, PrefixOK) {
+		msg := fmt.Sprintf("Could not send to server: %s", data)
+		return 0, errors.New(msg)
+	}
+
+	return len(b), nil
+}
+
 func (c *ProxyConnection) FillReadBuffer() error {
 	args := fmt.Sprintf("?uuid=" + c.uuid)
 	resp, err := http.Get(c.server + EndpointSync + args)

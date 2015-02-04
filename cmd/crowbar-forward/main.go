@@ -19,8 +19,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	n, err := conn.Write([]byte("test"))
+	if err != nil {
+		panic(err)
+	}
 	b := make([]byte, 1024)
-	n, err := conn.Read(b)
+	n, err = conn.Read(b)
 	if err != nil {
 		panic(err)
 	}
