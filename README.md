@@ -60,7 +60,7 @@ This assumes you're using Linux. If not, you're on your own.
 
 Set up an user for the service
 
-    useradd -rm crowbard
+    useradd -rm crowbar
     mkdir /etc/crowbar/
     chown crowbar:crowbar /etc/crowbar
 
