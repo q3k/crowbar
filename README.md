@@ -60,7 +60,7 @@ This assumes you're using Linux. If not, you're on your own.
 
 Set up an user for the service
 
-    useradd -rm crowbard
+    useradd -rm crowbar
     mkdir /etc/crowbar/
     chown crowbar:crowbar /etc/crowbar
 
@@ -77,7 +77,7 @@ Set up an iptables rule to forward traffic from the :80 port to :8080, where the
 
 Run the daemon in screen/tmux or write some unit files for your distribution:
 
-    crowbard -userfile=/etc/crowbard/userfile
+    crowbard -userfile=/etc/crowbar/userfile
 
 Client setup
 ------------
@@ -102,7 +102,7 @@ For port-forwarding:
 For SSH ProxyCommand integration, place this in your .ssh/config, and then SSH into your.ssh.host.com as usual:
 
     Host your.ssh.host.com
-        ProxyCommand crowbar-forward -local=- -username q3k -password secret -server http://your.proxy.server.com:80 -remote %h:%p 
+        ProxyCommand crowbar-forward -local=- -username q3k -password secret -server http://your.proxy.server.com:80 -remote %h:%p
 
 Building from source
 --------------------
