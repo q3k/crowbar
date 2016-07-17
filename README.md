@@ -109,8 +109,7 @@ Building from source
 
 I assume you have a working $GOPATH.
 
-    go get github.com/tools/godep
-    go get github.com/q3k/crowbar
-    godep restore github.com/q3k/crowbar/...
-    go install github.com/q3k/crowbar/...
+    go get github.com/q3k/crowbar/...
+
+crowbar-forward and crowbard will be in $GOPATH/bin.
 
