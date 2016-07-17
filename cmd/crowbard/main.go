@@ -31,11 +31,11 @@ import (
 	"flag"
 	"fmt"
 	"net"
-	"os"
 	"net/http"
+	"os"
 	"strconv"
 
-	"code.google.com/p/go-uuid/uuid"
+	"github.com/pborman/uuid"
 
 	"github.com/q3k/crowbar"
 )
