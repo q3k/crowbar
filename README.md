@@ -1,7 +1,7 @@
 Crowbar
 =======
 
-When a [corkscrew](http://www.agroman.net/corkscrew/) just isn't enough...
+When a [corkscrew](https://github.com/bryanpkc/corkscrew) just isn't enough...
 
 Intro
 -----
